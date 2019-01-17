@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Button} from 'react-native';
+import {Linking, Platform, StyleSheet, Text, View, Button, Alert} from 'react-native';
 import * as WeChat from 'react-native-wechat';
 
 const instructions = Platform.select({
@@ -60,6 +60,8 @@ export default class App extends Component<Props> {
       })
 
 
+
+
     // try {
     //   let result = await WeChat.shareToTimeline({
     //     type: 'text', 
@@ -88,11 +90,17 @@ export default class App extends Component<Props> {
     // );
   }
 
+  openLink(url) {
+    Linking.openURL(url).catch(err => console.error('An error occurred', err));
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>Welcome to React Native!</Text>
         <Button onPress={() => this.wechatLogin()} title="微信登录"><Text>微信登录</Text></Button>
+        <Text>Link Example</Text>
+        <Button onPress={() => this.openLink('http://maps.apple.com/?ll=37.484847,-122.148386')} title="Open Map"><Text>Open Map</Text></Button>
       </View>
     );
   }
