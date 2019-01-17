@@ -7,7 +7,8 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {Platform, StyleSheet, Text, View, Button} from 'react-native';
+import * as WeChat from 'react-native-wechat';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -18,12 +19,80 @@ const instructions = Platform.select({
 
 type Props = {};
 export default class App extends Component<Props> {
+
+  componentDidMount() {
+    WeChat.registerApp('appid');
+  }
+
+  wechatLogin() {
+    
+    console.log('btn wechatLogin clicked')
+
+    let scope = 'snsapi_userinfo';
+    let state = 'wechat_sdk_demo';
+    //判断微信是否安装
+    WeChat.isWXAppInstalled()
+      .then((isInstalled) => {
+        console.log('wechat installed: ', isInstalled)
+        if (isInstalled) {
+          //发送授权请求
+          WeChat.sendAuthRequest(scope, state)
+            .then(responseCode => {
+              console.log('responseCode', responseCode)
+              //返回code码，通过code获取access_token
+              this.getAccessToken(responseCode.code);
+            })
+            .catch(err => {
+              Alert.alert('登录授权发生错误：', err.message, [
+                {text: '确定'}
+              ]);
+            })
+        } else {
+          Platform.OS == 'ios' ?
+            Alert.alert('没有安装微信', '是否安装微信？', [
+              {text: '取消'},
+              {text: '确定', onPress: () => this.installWechat()}
+            ]) :
+            Alert.alert('没有安装微信', '请先安装微信客户端在进行登录', [
+              {text: '确定'}
+            ])
+        }
+      })
+
+
+    // try {
+    //   let result = await WeChat.shareToTimeline({
+    //     type: 'text', 
+    //     description: 'hello, wechat'
+    //   });
+    //   console.log('share text message to time line successful:', result);
+    // } catch (e) {
+    //   if (e instanceof WeChat.WechatError) {
+    //     console.error(e.stack);
+    //   } else {
+    //     throw e;
+    //   }
+    // }
+
+    // WeChat.shareToTimeline({
+    //   type: 'imageUrl',
+    //   title: 'web image',
+    //   description: 'share web image to time line',
+    //   mediaTagName: 'email signature',
+    //   messageAction: undefined,
+    //   messageExt: undefined,
+    //   imageUrl: 'http://play.linwise.com/test1.png'
+    // }).then(
+    //   res => console.log(res),
+    //   err => console.log(err)
+    // );
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+        <Button onPress={() => this.wechatLogin()} title="微信登录"><Text>微信登录</Text></Button>
       </View>
     );
   }
